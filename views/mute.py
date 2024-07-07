@@ -58,6 +58,15 @@ class MuteButton(ui.DynamicItem[ui.Button], template=mute_template):
         if not isinstance(channel, discord.VoiceChannel):
             return
 
+        if not isinstance(interaction.user, discord.Member):
+            return
+
+        if not interaction.user.voice or not interaction.user.voice.channel:
+            return
+
+        if not interaction.user.voice.channel != channel:
+            return
+
         for member in channel.members:
             if not member.voice:
                 continue
@@ -101,6 +110,15 @@ class UnMuteButton(ui.DynamicItem[ui.Button], template=unmute_template):
         channel = interaction.guild.get_channel(self.channel_id)
 
         if not isinstance(channel, discord.VoiceChannel):
+            return
+
+        if not isinstance(interaction.user, discord.Member):
+            return
+
+        if not interaction.user.voice or not interaction.user.voice.channel:
+            return
+
+        if not interaction.user.voice.channel != channel:
             return
 
         for member in channel.members:
