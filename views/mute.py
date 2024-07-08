@@ -64,7 +64,7 @@ class MuteButton(ui.DynamicItem[ui.Button], template=mute_template):
         if not interaction.user.voice or not interaction.user.voice.channel:
             return
 
-        if not interaction.user.voice.channel != channel:
+        if interaction.user.voice.channel != channel:
             return
 
         for member in channel.members:
@@ -118,7 +118,7 @@ class UnMuteButton(ui.DynamicItem[ui.Button], template=unmute_template):
         if not interaction.user.voice or not interaction.user.voice.channel:
             return
 
-        if not interaction.user.voice.channel != channel:
+        if interaction.user.voice.channel != channel:
             return
 
         muters = interaction.client.muters.get(self.channel_id, {})
@@ -167,7 +167,7 @@ class _MemberSelectView(ui.View):
         if not interaction.client.muters.get(self.channel_id):
             interaction.client.muters[self.channel_id] = {}
 
-        now = interaction.client.muters.get(member_id)
+        now = interaction.client.muters[self.channel_id].get(member_id)
 
         target = interaction.guild.get_member(member_id)
 
@@ -177,13 +177,13 @@ class _MemberSelectView(ui.View):
         if not now:
             interaction.client.muters[self.channel_id][member_id] = True
             await interaction.channel.send(
-                f"{target.display_name}のミュートをオンにしたよ"
+                f"{target.display_name}のミュートをオンにしたよ", delete_after=15
             )
 
         else:
-            interaction.client.muters[self.channel_id][member_id] = False
+            interaction.client.muters[self.channel_id].pop(member_id, None)
             await interaction.channel.send(
-                f"{target.display_name}のミュートをオフにしたよ"
+                f"{target.display_name}のミュートをオフにしたよ", delete_after=15
             )
 
         await interaction.delete_original_response()
@@ -208,7 +208,7 @@ class MuteManageView(ui.View):
         if not interaction.user.voice or not interaction.user.voice.channel:
             return
 
-        if not interaction.user.voice.channel.id != self.channel_id:
+        if interaction.user.voice.channel.id != self.channel_id:
             return
 
         members = [
@@ -217,7 +217,7 @@ class MuteManageView(ui.View):
             if not member.bot
         ]
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             "ミュートを切り替えたい人を選んでね",
             view=_MemberSelectView(self.channel_id, members),
         )
@@ -232,11 +232,11 @@ class MuteManageView(ui.View):
         if not interaction.user.voice or not interaction.user.voice.channel:
             return
 
-        if not interaction.user.voice.channel.id != self.channel_id:
+        if interaction.user.voice.channel.id != self.channel_id:
             return
 
         interaction.client.muters[self.channel_id] = {}
-        await interaction.channel.send("リセットしたよ")
+        await interaction.channel.send("リセットしたよ", delete_after=15)
 
     async def start(self, channel):
         e = discord.Embed(title="下のボタンを押してミュートを管理できます！")
