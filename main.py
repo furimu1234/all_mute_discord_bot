@@ -8,6 +8,7 @@ class Main(commands.Bot):
 
         self._extensions = extensions
         self.is_sync_tree = is_sync_tree
+        self.muters = {}
 
     async def setup_hook(self) -> None:
         for extension in self._extensions:
