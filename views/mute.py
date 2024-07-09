@@ -71,9 +71,6 @@ class MuteButton(ui.DynamicItem[ui.Button], template=mute_template):
             if not member.voice:
                 continue
 
-            if member.voice.mute:
-                continue
-
             await member.edit(deafen=True, mute=True)
 
         await interaction.channel.send("全員ミュートにしました", delete_after=15)  # type: ignore
@@ -122,19 +119,17 @@ class UnMuteButton(ui.DynamicItem[ui.Button], template=unmute_template):
             return
 
         muters = interaction.client.muters.get(self.channel_id, {})
-
         for member in channel.members:
+            deafen = False
+            mute = False
             if not member.voice:
                 continue
 
             if muters.get(member.id):
-                continue
-
-            if not member.voice.mute:
-                continue
+                mute = True
 
             try:
-                await member.edit(deafen=False, mute=False)
+                await member.edit(deafen=deafen, mute=mute)
             except:
                 pass
 
